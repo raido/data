@@ -180,6 +180,27 @@ test("can unload all records for a given type", function(assert) {
   assert.equal(env.store.peekRecord('car', 1).get('person.name'), 'Richard II', 'Inverse can load relationship after the record is unloaded');
 });
 
+test("can unload all records for a given type + live record array", function(assert) {
+  env.adapter.findAll = function() {
+    return Ember.RSVP.Promise.resolve({
+      data: [{
+        type: 'boat',
+        id: 1,
+        attributes: {
+          name: 'Yacht'
+        }
+      }]
+    });
+  };
+
+  run(function() {
+    env.store.findAll('boat').then(() => {
+      env.store.unloadAll('boat');
+      assert.equal(env.store.peekAll('boat').get('length'), 0, 'there should be no boat records');
+    });
+  });
+});
+
 test("can unload all records", function(assert) {
   assert.expect(8);
 
